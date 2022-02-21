@@ -9,6 +9,7 @@ import Footer from '../Footer';
 import Welcome from '../Welcome';
 import CreateArticle from '../CreateArticle';
 import SingleArticle from '../SingleArticle';
+import { Auth } from '../Auth';
 
 class App extends React.Component {
   constructor() {
@@ -16,6 +17,7 @@ class App extends React.Component {
 
     this.state = {
       authUser: null,
+      articles: []
     };
   }
 
@@ -27,6 +29,12 @@ class App extends React.Component {
         authUser: JSON.parse(user),
       });
     }
+  }
+
+  setArticles = (articles) => {
+    this.setState({
+      articles
+    })
   }
 
   setAuthUser = (authUser) => {
@@ -54,6 +62,7 @@ class App extends React.Component {
               <Welcome
                 {...props}
                 getArticles={this.props.articlesService.getArticles}
+                setArticles={this.setArticles}
               />
             )
           }
@@ -78,19 +87,28 @@ class App extends React.Component {
             />)
             }
         />
-        <Route path="/article/:slug" component={SingleArticle} />
-        <Route
-          path="/articles/create"
-          render={
-            props => (
-              <CreateArticle
-                {...props}
-                getArticleCategories={this.props.articlesService.getArticleCategories}
-                createArticle={this.props.articlesService.createArticle}
-                token={this.state.authUser}
-              />
-            )
-          }
+        <Route 
+          path="/article/:slug" 
+          render={(props) => 
+            <SingleArticle 
+              {...props} 
+              getArticle={this.props.articlesService.getArticle} 
+              articles={this.state.articles}
+            />
+          } 
+        />
+
+        <Auth 
+        
+        path='/articles/create'
+        component={CreateArticle}
+        props={{
+          getArticleCategories: this.props.articlesService.getArticleCategories,
+          createArticle: this.props.articlesService.createArticle,
+          token: this.state.authUser ? this.state.authUser : null
+        }}
+        isAuthenticated={this.state.authUser !== null}
+        
         />
         {
           location.pathname !== '/login' && location.pathname !== '/signup' &&
